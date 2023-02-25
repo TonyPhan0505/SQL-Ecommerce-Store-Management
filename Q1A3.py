@@ -23,8 +23,12 @@ class Database:
     def save_database(self):
         self.conn.commit()
 
-    def run_query(self, script):
+    def run_script_query(self, script):
         self.cursor.executescript(script)
+        self.save_database()
+    
+    def run_single_query(self, query):
+        self.cursor.execute(query)
         self.save_database()
     
     def fetch_one(self):
@@ -73,7 +77,7 @@ class Database:
             DROP TABLE Old_Customers;
             DROP TABLE Old_Sellers;
         '''
-        self.run_query(script)
+        self.run_script_query(script)
     
     def self_optimized(self):
         script = '''
@@ -122,7 +126,7 @@ class Database:
             DROP TABLE Old_Customers;
             DROP TABLE Old_Sellers;
         '''
-        self.run_query(script)
+        self.run_script_query(script)
     
     def user_optimized(self):
         script = '''
@@ -132,7 +136,7 @@ class Database:
             CREATE INDEX seller_postal_code_index
             ON Sellers (seller_postal_code);
         '''
-        self.run_query(script)
+        self.run_script_query(script)
 ###################################################################
 
 
@@ -146,7 +150,7 @@ def solution(DATABASE, customer_postal_code):
         5. Count the number of records returned
     """
     script = f'''
-        SELECT COUNT(*) FROM (
+        SELECT COUNT(*) AS result FROM (
             SELECT *
             FROM Customers, Orders, Order_items
             WHERE Customers.customer_postal_code = {customer_postal_code} 
@@ -156,8 +160,8 @@ def solution(DATABASE, customer_postal_code):
             HAVING COUNT(*) > 1
         );
     '''
-    DATABASE.run_query(script)
-    return DATABASE.fetch_one()
+    DATABASE.run_single_query(script)
+    return DATABASE.fetch_one()[0]
 
 def run_solution(DATABASE, customer_postal_code):
     start_time = time.time()
@@ -243,5 +247,6 @@ if __name__ == "__main__":
     run_Scenarios(A3Large, customer_postal_code, weight_counts)
 
     ##### Termination #####
+    plot_chart(species, weight_counts, width, ax, bottom, "Query 1 (runtime in ms)")
     print("-------------------- Finished --------------------\n")
 ################################################################
