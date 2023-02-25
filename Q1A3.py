@@ -15,8 +15,12 @@ class Database:
     def save_database(self):
         self.conn.commit()
 
+    def run_query(self, script):
+        self.cursor.executescript(script)
+        self.save_database()
+
     def uninformed(self):
-        self.cursor.executescript('''
+        script = '''
             PRAGMA automatic_index = FALSE;
 
             ALTER TABLE Customers RENAME TO Old_Customers;
@@ -54,10 +58,11 @@ class Database:
             DROP TABLE Old_Orders;
             DROP TABLE Old_Customers;
             DROP TABLE Old_Sellers;
-        ''')
+        '''
+        self.run_query(script)
     
     def self_optimized(self):
-        self.cursor.executescript('''
+        script = '''
             PRAGMA automatic_index = TRUE;
 
             ALTER TABLE Customers RENAME TO Old_Customers;
@@ -102,17 +107,28 @@ class Database:
             DROP TABLE Old_Orders;
             DROP TABLE Old_Customers;
             DROP TABLE Old_Sellers;
-        ''')
+        '''
+        self.run_query(script)
     
     def user_optimized(self):
-        self.cursor.executescript('''
+        script = '''
             CREATE INDEX customer_postal_code_index
             ON Customers (customer_postal_code);
 
             CREATE INDEX seller_postal_code_index
             ON Sellers (seller_postal_code);
-        ''')
+        '''
+        self.run_query(script)
 ###################################################################
+
+
+######################## Solution Functions #######################
+def solution(database, customer_postal_code):
+    pass
+
+def run_solution():
+    pass
+##################################################################
 
 
 ############################# Main ##############################
