@@ -1,16 +1,22 @@
 ############### Imports ###############
 import sqlite3
+import time
 ######################################
 
 
 ############################# Class ##############################
 class Database:
     def __init__(self, database_name):
-        self.conn = sqlite3.connect(f"./{database_name}")
+        self.database_name = database_name
+        self.conn = sqlite3.connect(f"./{self.database_name}")
         self.cursor = self.conn.cursor()
-    
+
     def close_database(self):
         self.conn.close()
+
+    def reconnect_database(self):
+        self.conn = sqlite3.connect(f"./{self.database_name}")
+        self.cursor = self.conn.cursor()
 
     def save_database(self):
         self.conn.commit()
@@ -134,26 +140,66 @@ def solution(DATABASE, customer_postal_code):
         1. Select the customers with the customer_postal_code in the Customers table
         2. Inner join the result with the Orders table based on customer_id
         3. Inner join the result with the Order_items table based on order_id
-        4. Group the result by order_id and count the cardinality of each group
+        4. Group the result by order_ids associated with more than 1 order items
+        5. Count the number of records returned
     """
     script = f'''
-        SELECT COUNT(*)
-        FROM Customers, Orders, Order_items
-        WHERE Customers.customer_postal_code = {customer_postal_code} 
-            AND Orders.customer_id = Customers.customer_id
-            AND Orders.order_id = Order_items.order_id
-        GROUP BY (order_id)
-        HAVING COUNT(*) > 1
+        SELECT COUNT(*) FROM (
+            SELECT *
+            FROM Customers, Orders, Order_items
+            WHERE Customers.customer_postal_code = {customer_postal_code} 
+                AND Orders.customer_id = Customers.customer_id
+                AND Orders.order_id = Order_items.order_id
+            GROUP BY (Orders.order_id)
+            HAVING COUNT(*) > 1
+        );
     '''
     DATABASE.run_query(script)
     return DATABASE.fetch_one()
 
-def run_solution():
-    pass
+def run_solution(DATABASE, customer_postal_code):
+    start_time = time.time()
+    for _ in range(50):
+        result = solution(DATABASE, customer_postal_code)
+        print('Number of orders =', result)
+    end_time = time.time()
+    return end_time - start_time
+
+def run_Scenarios(DATABASE, customer_postal_code):
+    print("-- Uninformed Scenario:")
+    DATABASE.uninformed()
+    run_solution(DATABASE, customer_postal_code)
+    DATABASE.close_database()
+    DATABASE.reconnect_database()
+    print("-- Self-optimized Scenario:")
+    DATABASE.self_optimized()
+    run_solution(DATABASE, customer_postal_code)
+    DATABASE.close_database()
+    DATABASE.reconnect_database()
+    print("-- User-optimized Scenario")
+    DATABASE.user_optimized()
+    run_solution(DATABASE, customer_postal_code)
+    DATABASE.close_database()
 ##################################################################
 
 
 ############################# Main ##############################
 if __name__ == "__main__":
-    print("----- Done -----")
+    ##### Initialization #####
+    A3Small = Database('A3Small.db')
+    A3Medium = Database('A3Medium.db')
+    A3Large = Database('A3Large.db')
+    customer_postal_code = 14409
+    print("-------------------- Question 1: --------------------")
+
+    ##### Run Scenarios #####
+    print('- A3Small:')
+    run_Scenarios(A3Small, customer_postal_code)
+    print('- A3Medium:')
+    run_Scenarios(A3Medium, customer_postal_code)
+    print('- A3Large:')
+    run_Scenarios(A3Large, customer_postal_code)
+
+    ##### Termination #####
+    print("-------------------- Finished --------------------")
 ################################################################
