@@ -18,6 +18,12 @@ class Database:
     def run_query(self, script):
         self.cursor.executescript(script)
         self.save_database()
+    
+    def fetch_one(self):
+        return self.cursor.fetchone()
+    
+    def fetch_all(self):
+        return self.cursor.fetchall()
 
     def uninformed(self):
         script = '''
@@ -123,8 +129,24 @@ class Database:
 
 
 ######################## Solution Functions #######################
-def solution(database, customer_postal_code):
-    pass
+def solution(DATABASE, customer_postal_code):
+    """
+        1. Select the customers with the customer_postal_code in the Customers table
+        2. Inner join the result with the Orders table based on customer_id
+        3. Inner join the result with the Order_items table based on order_id
+        4. Group the result by order_id and count the cardinality of each group
+    """
+    script = f'''
+        SELECT COUNT(*)
+        FROM Customers, Orders, Order_items
+        WHERE Customers.customer_postal_code = {customer_postal_code} 
+            AND Orders.customer_id = Customers.customer_id
+            AND Orders.order_id = Order_items.order_id
+        GROUP BY (order_id)
+        HAVING COUNT(*) > 1
+    '''
+    DATABASE.run_query(script)
+    return DATABASE.fetch_one()
 
 def run_solution():
     pass
