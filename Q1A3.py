@@ -168,18 +168,21 @@ def run_solution(DATABASE, customer_postal_code):
 def run_Scenarios(DATABASE, customer_postal_code):
     print("-- Uninformed Scenario:")
     DATABASE.uninformed()
-    run_solution(DATABASE, customer_postal_code)
+    time_taken = run_solution(DATABASE, customer_postal_code)
     DATABASE.close_database()
     DATABASE.reconnect_database()
+    print('Time taken =', time_taken)
     print("-- Self-optimized Scenario:")
     DATABASE.self_optimized()
-    run_solution(DATABASE, customer_postal_code)
+    time_taken = run_solution(DATABASE, customer_postal_code)
     DATABASE.close_database()
     DATABASE.reconnect_database()
+    print('Time taken =', time_taken)
     print("-- User-optimized Scenario")
     DATABASE.user_optimized()
-    run_solution(DATABASE, customer_postal_code)
+    time_taken = run_solution(DATABASE, customer_postal_code)
     DATABASE.close_database()
+    print('Time taken =', time_taken)
 ##################################################################
 
 
@@ -195,11 +198,11 @@ if __name__ == "__main__":
     ##### Run Scenarios #####
     print('- A3Small:')
     run_Scenarios(A3Small, customer_postal_code)
-    print('- A3Medium:')
+    print('\n- A3Medium:')
     run_Scenarios(A3Medium, customer_postal_code)
-    print('- A3Large:')
+    print('\n- A3Large:')
     run_Scenarios(A3Large, customer_postal_code)
 
     ##### Termination #####
-    print("-------------------- Finished --------------------")
+    print("-------------------- Finished --------------------\n")
 ################################################################
