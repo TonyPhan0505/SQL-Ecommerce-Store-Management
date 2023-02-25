@@ -1,16 +1,22 @@
 ############### Imports ###############
 import sqlite3
+import time
 ######################################
 
 
 ############################# Class ##############################
 class Database:
     def __init__(self, database_name):
-        self.conn = sqlite3.connect(f"./{database_name}")
+        self.database_name = database_name
+        self.conn = sqlite3.connect(f"./{self.database_name}")
         self.cursor = self.conn.cursor()
-    
+
     def close_database(self):
         self.conn.close()
+
+    def reconnect_database(self):
+        self.conn = sqlite3.connect(f"./{self.database_name}")
+        self.cursor = self.conn.cursor()
 
     def save_database(self):
         self.conn.commit()
@@ -128,51 +134,85 @@ class Database:
 ###################################################################
 
 
+#####################Solution Functions############################
+def solution(DATABASE):
+    '''
+    1. Create view
+    2. Find average number of items in orders
+    3. Find orders that have items more than the average number of items in the orders.
+    '''
+    script = f'''
+    CREATE VIEW OrderSize AS
+    SELECT order_id AS oid, COUNT(order_item_id) AS size
+    FROM Order_items
+    GROUP BY order_id;
+
+    WITH avg_items AS (
+    SELECT AVG(size) AS avg_size
+    FROM OrderSize
+    )
+    SELECT COUNT(DISTINCT o.order_id)
+    FROM Orders o
+    JOIN OrderSize os ON o.order_id = os.oid
+    JOIN avg_items ai
+    WHERE o.customer_id IN (
+    SELECT customer_id
+    FROM Customers
+    WHERE customer_postal_code = [random_customer_postal_code]
+    )
+    AND os.oid IN (
+    SELECT order_id
+    FROM Order_items
+    GROUP BY order_id
+    HAVING COUNT(*) > ai.avg_size
+    );
+    '''
+    DATABASE.run_query(script)
+    return DATABASE.fetch_one()
+
+def run_solution(DATABASE):
+    start_time = time.time()
+    for _ in range(50):
+        result = solution(DATABASE)
+        print('Number of orders that have items more than the average number of items in the orders =', result)
+    end_time = time.time()
+    return end_time - start_time
+
+def run_Scenarios(DATABASE):
+    print("-- Uninformed Scenario:")
+    DATABASE.uninformed()
+    run_solution(DATABASE)
+    DATABASE.close_database()
+    DATABASE.reconnect_database()
+    print("-- Self-optimized Scenario:")
+    DATABASE.self_optimized()
+    run_solution(DATABASE)
+    DATABASE.close_database()
+    DATABASE.reconnect_database()
+    print("-- User-optimized Scenario")
+    DATABASE.user_optimized()
+    run_solution(DATABASE)
+    DATABASE.close_database()
+    
+###################################################################
+
+
 ############################# Main ##############################
 if __name__ == "__main__":
-    print("----- Done -----")
+    ##### Initialization #####
+    A3Small = Database('A3Small.db')
+    A3Medium = Database('A3Medium.db')
+    A3Large = Database('A3Large.db')
+    print("-------------------- Q2: --------------------")
+
+    ##### Run Scenarios #####
+    print('- A3Small:')
+    run_Scenarios(A3Small)
+    print('- A3Medium:')
+    run_Scenarios(A3Medium)
+    print('- A3Large:')
+    run_Scenarios(A3Large)
+
+    ##### Termination #####
+    print("-------------------- Finished --------------------")
 ################################################################
-
-# --Create view
-# CREATE VIEW OrderSize AS
-# SELECT order_id AS oid, COUNT(item_id) AS size
-# FROM order_items
-# GROUP BY order_id;
-
-# --Orders that have items more than the average number of items in the orders.
-# WITH avg_items AS (
-#   SELECT AVG(size) AS avg_size
-#   FROM OrderSize
-# )
-# SELECT COUNT(DISTINCT o.order_id)
-# FROM orders o
-# JOIN OrderSize os ON o.order_id = os.oid
-# JOIN avg_items ai
-# WHERE o.customer_id IN (
-#   SELECT customer_id
-#   FROM Customers
-#   WHERE customer_postal_code = [random_customer_postal_code]
-# )
-# AND os.oid IN (
-#   SELECT order_id
-#   FROM order_items
-#   GROUP BY order_id
-#   HAVING COUNT(*) > ai.avg_size
-# );
-
-
-# A3Small.db
-uniformed_A3Small = Database("A3Small.db")
-uniformed_A3Small.uninformed()
-
-self_A3Small = Database("A3Small.db")
-self_A3Small.self_optimized()
-
-user_A3Small = Database("A3Small.db")
-user_A3Small.user_optimized()
-
-# A3Medium.db
-A3Medium = Database("A3Medium.db")
-
-# A3Large.db
-A3Large = Database("A3Large.db")
