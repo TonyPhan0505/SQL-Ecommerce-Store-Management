@@ -1,6 +1,8 @@
 ############### Imports ###############
 import sqlite3
 import time
+import matplotlib.pyplot as plt
+import numpy as np
 ######################################
 
 
@@ -163,24 +165,51 @@ def run_solution(DATABASE, customer_postal_code):
         result = solution(DATABASE, customer_postal_code)
         print('Number of orders =', result)
     end_time = time.time()
-    return end_time - start_time
+    return (end_time - start_time) * (10**3)
 
-def run_Scenarios(DATABASE, customer_postal_code):
+def fill_weight_counts(scenario, weight_counts, time_taken):
+    if weight_counts[scenario][0] == None:
+        weight_counts[scenario][0] = time_taken
+    elif weight_counts[scenario][1] == None:
+        weight_counts[scenario][1] = time_taken
+    else:
+        weight_counts[scenario][2] = time_taken
+
+def run_Scenarios(DATABASE, customer_postal_code, weight_counts):
     print("-- Uninformed Scenario:")
     DATABASE.uninformed()
-    run_solution(DATABASE, customer_postal_code)
+    time_taken = run_solution(DATABASE, customer_postal_code)
     DATABASE.close_database()
     DATABASE.reconnect_database()
+    print('Time taken =', time_taken)
+    fill_weight_counts("Uninformed", weight_counts, time_taken)
+
     print("-- Self-optimized Scenario:")
     DATABASE.self_optimized()
-    run_solution(DATABASE, customer_postal_code)
+    time_taken = run_solution(DATABASE, customer_postal_code)
     DATABASE.close_database()
     DATABASE.reconnect_database()
+    print('Time taken =', time_taken)
+    fill_weight_counts("Self-optimized", weight_counts, time_taken)
+
     print("-- User-optimized Scenario")
     DATABASE.user_optimized()
-    run_solution(DATABASE, customer_postal_code)
+    time_taken = run_solution(DATABASE, customer_postal_code)
     DATABASE.close_database()
+    print('Time taken =', time_taken)
+    fill_weight_counts("User-optimized", weight_counts, time_taken)
 ##################################################################
+
+
+####################### Chart Plotting Function #######################
+def plot_chart(species, weight_counts, width, ax, bottom, title):
+    for boolean, weight_count in weight_counts.items():
+        p = ax.bar(species, weight_count, width, label=boolean, bottom=bottom)
+        bottom += weight_count
+    ax.set_title(title)
+    ax.legend(loc="upper center")
+    plt.show()
+#######################################################################
 
 
 ############################# Main ##############################
@@ -190,16 +219,29 @@ if __name__ == "__main__":
     A3Medium = Database('A3Medium.db')
     A3Large = Database('A3Large.db')
     customer_postal_code = 14409
+    species = (
+        "SmallDB",
+        "MediumDB",
+        "LargeDB",
+    )
+    weight_counts = {
+        "Uninformed": [None,None,None],
+        "Self-optimized": [None,None,None],
+        "User-optimized": [None,None,None]
+    }
+    width = 0.5
+    fig, ax = plt.subplots()
+    bottom = np.zeros(3)
     print("-------------------- Question 1: --------------------")
 
     ##### Run Scenarios #####
     print('- A3Small:')
-    run_Scenarios(A3Small, customer_postal_code)
-    print('- A3Medium:')
-    run_Scenarios(A3Medium, customer_postal_code)
-    print('- A3Large:')
-    run_Scenarios(A3Large, customer_postal_code)
+    run_Scenarios(A3Small, customer_postal_code, weight_counts)
+    print('\n- A3Medium:')
+    run_Scenarios(A3Medium, customer_postal_code, weight_counts)
+    print('\n- A3Large:')
+    run_Scenarios(A3Large, customer_postal_code, weight_counts)
 
     ##### Termination #####
-    print("-------------------- Finished --------------------")
+    print("-------------------- Finished --------------------\n")
 ################################################################
