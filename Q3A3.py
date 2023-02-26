@@ -137,6 +137,13 @@ class Database:
             ON Sellers (seller_postal_code);
         '''
         self.run_script_query(script)
+
+    def drop_indices(self):
+        script = '''
+            DROP INDEX Customers.customer_postal_code_index;
+            DROP INDEX Sellers.seller_postal_code_index;
+        '''
+        self.run_script_query(script)
 ###################################################################
 
 
@@ -252,5 +259,8 @@ if __name__ == "__main__":
 
     ##### Termination #####
     plot_chart(species, weight_counts, width, ax, bottom, "Query 3 (runtime in ms)")
+    A3Small.drop_indices()
+    A3Medium.drop_indices()
+    A3Large.drop_indices()
     print("-------------------- Finished --------------------\n")
 ################################################################
