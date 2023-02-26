@@ -165,7 +165,7 @@ def solution(DATABASE, customer_postal_code):
         HAVING COUNT(*) > 1
     )
     GROUP BY customer_id
-    ORDER BY RAND()
+    ORDER BY RANDOM()
     LIMIT 1;
     '''
     DATABASE.run_single_query(script)
