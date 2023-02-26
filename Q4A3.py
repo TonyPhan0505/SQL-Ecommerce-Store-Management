@@ -137,13 +137,36 @@ class Database:
             ON Sellers (seller_postal_code);
         '''
         self.run_script_query(script)
+
+    def drop_indices(self):
+        script = '''
+            DROP INDEX Customers.customer_postal_code_index;
+            DROP INDEX Sellers.seller_postal_code_index;
+        '''
+        self.run_script_query(script)
 ###################################################################
 
 
 ######################## Solution Functions #######################
 def solution(DATABASE, customer_postal_code):
+    '''
+    1. Select customer_id's having more than one order (filter out customers with only one order)
+    2. Count the unique postal codes for that customer's orders then group by customer_id
+    3. Sort result randomly
+    4. Select the first row
+    '''
     script = f'''
-
+    SELECT COUNT(DISTINCT customer_postal_code) AS unique_postal_codes
+    FROM Customers
+    WHERE customer_id IN (
+        SELECT customer_id
+        FROM Orders
+        GROUP BY customer_id
+        HAVING COUNT(*) > 1
+    )
+    GROUP BY customer_id
+    ORDER BY RAND()
+    LIMIT 1;
     '''
     DATABASE.run_single_query(script)
     return DATABASE.fetch_one()[0]
@@ -233,5 +256,8 @@ if __name__ == "__main__":
 
     ##### Termination #####
     plot_chart(species, weight_counts, width, ax, bottom, "Query 4 (runtime in ms)")
+    A3Small.drop_indices()
+    A3Medium.drop_indices()
+    A3Large.drop_indices()
     print("-------------------- Finished --------------------\n")
 ################################################################

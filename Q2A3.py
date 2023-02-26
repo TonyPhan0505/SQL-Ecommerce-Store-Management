@@ -173,7 +173,7 @@ def solution(DATABASE, customer_postal_code):
     HAVING COUNT(*) > ai.avg_size
     );
     '''
-    DATABASE.run_script_query(script)
+    DATABASE.run_single_query(script)
     return DATABASE.fetch_one()[0]
 
 def run_solution(DATABASE, customer_postal_code):
