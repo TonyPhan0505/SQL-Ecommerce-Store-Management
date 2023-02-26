@@ -164,7 +164,7 @@ def solution(DATABASE, customer_postal_code):
     WHERE o.customer_id IN (
     SELECT customer_id
     FROM Customers
-    WHERE Customer.customer_postal_code = {customer_postal_code}
+    WHERE Customers.customer_postal_code = {customer_postal_code}
     )
     AND os.oid IN (
     SELECT order_id
@@ -173,7 +173,7 @@ def solution(DATABASE, customer_postal_code):
     HAVING COUNT(*) > ai.avg_size
     );
     '''
-    DATABASE.run_single_query(script)
+    DATABASE.run_script_query(script)
     return DATABASE.fetch_one()[0]
 
 def run_solution(DATABASE, customer_postal_code):
