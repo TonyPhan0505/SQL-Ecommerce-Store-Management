@@ -251,6 +251,6 @@ if __name__ == "__main__":
     run_Scenarios(A3Large, customer_postal_code, weight_counts)
 
     ##### Termination #####
-    plot_chart(species, weight_counts, width, ax, bottom, "Query 1 (runtime in ms)")
+    plot_chart(species, weight_counts, width, ax, bottom, "Query 3 (runtime in ms)")
     print("-------------------- Finished --------------------\n")
 ################################################################
