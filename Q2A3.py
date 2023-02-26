@@ -1,6 +1,8 @@
 ############### Imports ###############
 import sqlite3
 import time
+import matplotlib.pyplot as plt
+import numpy as np
 ######################################
 
 
@@ -21,8 +23,12 @@ class Database:
     def save_database(self):
         self.conn.commit()
 
-    def run_query(self, script):
+    def run_script_query(self, script):
         self.cursor.executescript(script)
+        self.save_database()
+    
+    def run_single_query(self, query):
+        self.cursor.execute(query)
         self.save_database()
     
     def fetch_one(self):
@@ -71,7 +77,7 @@ class Database:
             DROP TABLE Old_Customers;
             DROP TABLE Old_Sellers;
         '''
-        self.run_query(script)
+        self.run_script_query(script)
     
     def self_optimized(self):
         script = '''
@@ -120,7 +126,7 @@ class Database:
             DROP TABLE Old_Customers;
             DROP TABLE Old_Sellers;
         '''
-        self.run_query(script)
+        self.run_script_query(script)
     
     def user_optimized(self):
         script = '''
@@ -130,12 +136,12 @@ class Database:
             CREATE INDEX seller_postal_code_index
             ON Sellers (seller_postal_code);
         '''
-        self.run_query(script)
+        self.run_script_query(script)
 ###################################################################
 
 
-#####################Solution Functions############################
-def solution(DATABASE):
+######################## Solution Functions #######################
+def solution(DATABASE, customer_postal_code):
     '''
     1. Create view
     2. Find average number of items in orders
@@ -158,7 +164,7 @@ def solution(DATABASE):
     WHERE o.customer_id IN (
     SELECT customer_id
     FROM Customers
-    WHERE customer_postal_code = [random_customer_postal_code]
+    WHERE Customer.customer_postal_code = {customer_postal_code}
     )
     AND os.oid IN (
     SELECT order_id
@@ -167,34 +173,60 @@ def solution(DATABASE):
     HAVING COUNT(*) > ai.avg_size
     );
     '''
-    DATABASE.run_query(script)
-    return DATABASE.fetch_one()
+    DATABASE.run_single_query(script)
+    return DATABASE.fetch_one()[0]
 
-def run_solution(DATABASE):
+def run_solution(DATABASE, customer_postal_code):
     start_time = time.time()
     for _ in range(50):
-        result = solution(DATABASE)
+        result = solution(DATABASE, customer_postal_code)
         print('Number of orders that have items more than the average number of items in the orders =', result)
     end_time = time.time()
-    return end_time - start_time
+    return (end_time - start_time) * (10**3)
 
-def run_Scenarios(DATABASE):
+def fill_weight_counts(scenario, weight_counts, time_taken):
+    if weight_counts[scenario][0] == None:
+        weight_counts[scenario][0] = time_taken
+    elif weight_counts[scenario][1] == None:
+        weight_counts[scenario][1] = time_taken
+    else:
+        weight_counts[scenario][2] = time_taken
+
+def run_Scenarios(DATABASE, customer_postal_code, weight_counts):
     print("-- Uninformed Scenario:")
     DATABASE.uninformed()
-    run_solution(DATABASE)
+    time_taken = run_solution(DATABASE, customer_postal_code)
     DATABASE.close_database()
     DATABASE.reconnect_database()
+    print('Time taken =', time_taken)
+    fill_weight_counts("Uninformed", weight_counts, time_taken)
+
     print("-- Self-optimized Scenario:")
     DATABASE.self_optimized()
-    run_solution(DATABASE)
+    time_taken = run_solution(DATABASE, customer_postal_code)
     DATABASE.close_database()
     DATABASE.reconnect_database()
+    print('Time taken =', time_taken)
+    fill_weight_counts("Self-optimized", weight_counts, time_taken)
+
     print("-- User-optimized Scenario")
     DATABASE.user_optimized()
-    run_solution(DATABASE)
+    time_taken = run_solution(DATABASE, customer_postal_code)
     DATABASE.close_database()
-    
-###################################################################
+    print('Time taken =', time_taken)
+    fill_weight_counts("User-optimized", weight_counts, time_taken)
+##################################################################
+
+
+####################### Chart Plotting Function #######################
+def plot_chart(species, weight_counts, width, ax, bottom, title):
+    for boolean, weight_count in weight_counts.items():
+        p = ax.bar(species, weight_count, width, label=boolean, bottom=bottom)
+        bottom += weight_count
+    ax.set_title(title)
+    ax.legend(loc="upper center")
+    plt.show()
+#######################################################################
 
 
 ############################# Main ##############################
@@ -203,16 +235,31 @@ if __name__ == "__main__":
     A3Small = Database('A3Small.db')
     A3Medium = Database('A3Medium.db')
     A3Large = Database('A3Large.db')
-    print("-------------------- Q2: --------------------")
+    customer_postal_code = 14409
+    species = (
+        "SmallDB",
+        "MediumDB",
+        "LargeDB",
+    )
+    weight_counts = {
+        "Uninformed": [None,None,None],
+        "Self-optimized": [None,None,None],
+        "User-optimized": [None,None,None]
+    }
+    width = 0.5
+    fig, ax = plt.subplots()
+    bottom = np.zeros(3)
+    print("-------------------- Question 2: --------------------")
 
     ##### Run Scenarios #####
     print('- A3Small:')
-    run_Scenarios(A3Small)
-    print('- A3Medium:')
-    run_Scenarios(A3Medium)
-    print('- A3Large:')
-    run_Scenarios(A3Large)
+    run_Scenarios(A3Small, customer_postal_code, weight_counts)
+    print('\n- A3Medium:')
+    run_Scenarios(A3Medium, customer_postal_code, weight_counts)
+    print('\n- A3Large:')
+    run_Scenarios(A3Large, customer_postal_code, weight_counts)
 
     ##### Termination #####
-    print("-------------------- Finished --------------------")
+    plot_chart(species, weight_counts, width, ax, bottom, "Query 2 (runtime in ms)")
+    print("-------------------- Finished --------------------\n")
 ################################################################
