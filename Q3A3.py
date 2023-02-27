@@ -140,8 +140,8 @@ class Database:
 
     def drop_indices(self):
         script = '''
-            DROP INDEX Customers.customer_postal_code_index;
-            DROP INDEX Sellers.seller_postal_code_index;
+            DROP INDEX seller_postal_code_index;
+            DROP INDEX customer_postal_code_index;
         '''
         self.run_script_query(script)
 ###################################################################
@@ -156,29 +156,31 @@ def solution(DATABASE, customer_postal_code):
         4. Group the result by order_ids associated with more than the average order items
     """
     script = f'''
-        SELECT Orders.order_id AS oid, COUNT(*) AS size
-        FROM Customers, Orders, Order_items
-        WHERE Customers.customer_postal_code = {customer_postal_code} 
-            AND Orders.customer_id = Customers.customer_id
-            AND Orders.order_id = Order_items.order_id
-        GROUP BY (Orders.order_id)
-        HAVING COUNT(*) > (
-            SELECT AVG(s) FROM (
-                SELECT COUNT(*) AS s
-                FROM Orders, Order_items
-                WHERE Orders.order_id = Order_items.order_id
-                GROUP BY (Orders.order_id)
+        SELECT COUNT(*) AS result FROM (
+            SELECT Orders.order_id AS oid, COUNT(*) AS size
+            FROM Customers, Orders, Order_items
+            WHERE Customers.customer_postal_code = {customer_postal_code} 
+                AND Orders.customer_id = Customers.customer_id
+                AND Orders.order_id = Order_items.order_id
+            GROUP BY (Orders.order_id)
+            HAVING COUNT(*) > (
+                SELECT AVG(s) FROM (
+                    SELECT COUNT(*) AS s
+                    FROM Orders, Order_items
+                    WHERE Orders.order_id = Order_items.order_id
+                    GROUP BY (Orders.order_id)
+                )
             )
         );
     '''
     DATABASE.run_single_query(script)
-    return DATABASE.fetch_all()
+    return DATABASE.fetch_one()[0]
 
 def run_solution(DATABASE, customer_postal_code):
     start_time = time.time()
     for _ in range(50):
         result = solution(DATABASE, customer_postal_code)
-        print(list(result))
+        print('Number of orders =', result)
     end_time = time.time()
     return (end_time - start_time) * (10**3)
 
@@ -258,9 +260,17 @@ if __name__ == "__main__":
     run_Scenarios(A3Large, customer_postal_code, weight_counts)
 
     ##### Termination #####
-    plot_chart(species, weight_counts, width, ax, bottom, "Query 3 (runtime in ms)")
+    A3Small.reconnect_database()
     A3Small.drop_indices()
+    A3Small.close_database()
+
+    A3Medium.reconnect_database()
     A3Medium.drop_indices()
+    A3Medium.close_database()
+
+    A3Large.reconnect_database()
     A3Large.drop_indices()
+    A3Large.close_database()
     print("-------------------- Finished --------------------\n")
+    plot_chart(species, weight_counts, width, ax, bottom, "Query 3 (runtime in ms)")
 ################################################################
