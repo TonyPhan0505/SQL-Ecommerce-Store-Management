@@ -137,6 +137,13 @@ class Database:
             ON Sellers (seller_postal_code);
         '''
         self.run_script_query(script)
+
+    def drop_indices(self):
+        script = '''
+            DROP INDEX seller_postal_code_index;
+            DROP INDEX customer_postal_code_index;
+        '''
+        self.run_script_query(script)
 ###################################################################
 
 
@@ -260,6 +267,17 @@ if __name__ == "__main__":
     run_Scenarios(A3Large, customer_postal_code, weight_counts)
 
     ##### Termination #####
-    plot_chart(species, weight_counts, width, ax, bottom, "Query 2 (runtime in ms)")
+    A3Small.reconnect_database()
+    A3Small.drop_indices()
+    A3Small.close_database()
+
+    A3Medium.reconnect_database()
+    A3Medium.drop_indices()
+    A3Medium.close_database()
+
+    A3Large.reconnect_database()
+    A3Large.drop_indices()
+    A3Large.close_database()
     print("-------------------- Finished --------------------\n")
+    plot_chart(species, weight_counts, width, ax, bottom, "Query 4 (runtime in ms)")
 ################################################################

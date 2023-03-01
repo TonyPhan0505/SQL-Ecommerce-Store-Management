@@ -140,8 +140,8 @@ class Database:
 
     def drop_indices(self):
         script = '''
-            DROP INDEX Customers.customer_postal_code_index;
-            DROP INDEX Sellers.seller_postal_code_index;
+            DROP INDEX seller_postal_code_index;
+            DROP INDEX customer_postal_code_index;
         '''
         self.run_script_query(script)
 ###################################################################
