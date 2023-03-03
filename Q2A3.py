@@ -179,8 +179,10 @@ def solution(DATABASE, customer_postal_code):
     GROUP BY order_id
     HAVING COUNT(*) > ai.avg_size
     );
+
+    DROP VIEW IF EXISTS OrderSize;
     '''
-    DATABASE.run_single_query(script)
+    DATABASE.run_script_query(script)
     return DATABASE.fetch_one()[0]
 
 def run_solution(DATABASE, customer_postal_code):

@@ -169,7 +169,7 @@ def solution(DATABASE, customer_postal_code):
     LIMIT 1;
     '''
     DATABASE.run_single_query(script)
-    return DATABASE.fetch_one()[0]
+    return DATABASE.fetch_one()
 
 def run_solution(DATABASE, customer_postal_code):
     start_time = time.time()
