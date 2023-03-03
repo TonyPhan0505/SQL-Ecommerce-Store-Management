@@ -183,7 +183,7 @@ def solution(DATABASE, customer_postal_code):
     DROP VIEW IF EXISTS OrderSize;
     '''
     DATABASE.run_script_query(script)
-    return DATABASE.fetch_one()[0]
+    return DATABASE.fetch_one()
 
 def run_solution(DATABASE, customer_postal_code):
     start_time = time.time()
