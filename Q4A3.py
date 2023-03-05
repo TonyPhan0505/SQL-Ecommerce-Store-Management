@@ -270,5 +270,5 @@ if __name__ == "__main__":
     A3Large.drop_indices()
     A3Large.close_database()
     print("-------------------- Finished --------------------\n")
-    plot_chart(species, weight_counts, width, ax, bottom, "Query 2 (runtime in ms)")
+    plot_chart(species, weight_counts, width, ax, bottom, "Query 4 (runtime in ms)")
 ################################################################
