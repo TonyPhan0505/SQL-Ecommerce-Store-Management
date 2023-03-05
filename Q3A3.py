@@ -150,10 +150,10 @@ class Database:
 ######################## Solution Functions #######################
 def solution(DATABASE, customer_postal_code):
     """
-        1. Select the customers with the customer_postal_code in the Customers table
-        2. Inner join the result with the Orders table based on customer_id
-        3. Inner join the result with the Order_items table based on order_id
-        4. Group the result by order_ids associated with more than the average order items
+        1. Inner join Customers, Orders and Order_items based on customer_id and order_id
+        2. Find the records with the given customer_postal_code
+        3. Group the result by order_id and only get the group whose cardinality is larger than the average number of order items
+        4. Count the number of groups returned
     """
     script = f'''
         SELECT COUNT(*) AS result FROM (
