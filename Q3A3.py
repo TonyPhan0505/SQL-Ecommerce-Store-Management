@@ -138,12 +138,16 @@ class Database:
             
             CREATE INDEX order_item_id_index
             ON Order_items (order_item_id);
+            
+            CREATE INDEX customer_id_index
+            ON Customers (customer_id);
         '''
         self.run_script_query(script)
 
     def drop_indices(self):
         script = '''
             DROP INDEX customer_postal_code_index;
+            DROP INDEX customer_id_index;
             DROP INDEX order_id_index;
             DROP INDEX order_item_id_index;
         '''
