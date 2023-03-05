@@ -175,7 +175,7 @@ def run_solution(DATABASE, customer_postal_code):
     start_time = time.time()
     for _ in range(50):
         result = solution(DATABASE, customer_postal_code)
-        print('Number of orders that have items more than the average number of items in the orders =', result)
+        print('Number of orders =', result)
     end_time = time.time()
     return (end_time - start_time) * (10**3)
 
