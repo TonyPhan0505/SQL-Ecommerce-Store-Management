@@ -130,18 +130,14 @@ class Database:
     
     def user_optimized(self):
         script = '''
-            CREATE INDEX customer_postal_code_index
-            ON Customers (customer_postal_code);
-
-            CREATE INDEX seller_postal_code_index
-            ON Sellers (seller_postal_code);
+            CREATE INDEX customer_id_index
+            ON Customers(customer_id);
         '''
         self.run_script_query(script)
 
     def drop_indices(self):
         script = '''
-            DROP INDEX seller_postal_code_index;
-            DROP INDEX customer_postal_code_index;
+            DROP INDEX customer_id_index;
         '''
         self.run_script_query(script)
 ###################################################################
@@ -150,26 +146,24 @@ class Database:
 ######################## Solution Functions #######################
 def solution(DATABASE, customer_postal_code):
     '''
-    1. Select customer_id's having more than one order (filter out customers with only one order)
-    2. Count the unique postal codes for that customer's orders then group by customer_id
-    3. Sort result randomly
-    4. Select the first row
+    1. Select a random customer_id having more than one order
+    2. Use this customer_id to join the Customers, Orders and Sellers tables to get postal codes of all sellers who have sold to this customer
+    3. Count the unique postal codes
     '''
     script = f'''
-    SELECT COUNT(DISTINCT customer_postal_code) AS num_postal_codes
-FROM (
-    SELECT c.customer_postal_code
-    FROM Orders o, Customers c, Sellers s
-    WHERE o.customer_id = (
+    SELECT COUNT(DISTINCT s.seller_postal_code) AS result
+    FROM Customers c, Orders o, Sellers s
+    WHERE c.customer_id = o.customer_id AND c.customer_id = (
         SELECT customer_id
-        FROM Orders
-        GROUP BY customer_id
-        HAVING COUNT(DISTINCT order_id) > 1
-        ORDER BY RANDOM()
-        LIMIT 1
+        FROM (
+            SELECT customer_id, COUNT(*) AS order_count
+            FROM Orders
+            GROUP BY customer_id
+            HAVING order_count > 1
+            ORDER BY RANDOM()
+            LIMIT 1
+        ) AS random_customer
     )
-    GROUP BY s.seller_id
-) ;
     '''
     DATABASE.run_single_query(script)
     return DATABASE.fetch_one()
