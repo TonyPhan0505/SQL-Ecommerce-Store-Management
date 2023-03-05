@@ -132,6 +132,9 @@ class Database:
         script = '''
             CREATE INDEX customer_postal_code_index
             ON Customers (customer_postal_code);
+            
+            CREATE INDEX customer_id_index
+            ON Customers (customer_id);
 
             CREATE INDEX order_id_index
             ON Orders (order_id);
@@ -142,6 +145,7 @@ class Database:
         script = '''
             DROP INDEX order_id_index;
             DROP INDEX customer_postal_code_index;
+            DROP INDEX customer_id_index;
         '''
         self.run_script_query(script)
 ###################################################################
