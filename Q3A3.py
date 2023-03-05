@@ -135,6 +135,12 @@ class Database:
 
             CREATE INDEX seller_postal_code_index
             ON Sellers (seller_postal_code);
+            
+            CREATE INDEX order_id_index
+            ON Orders (order_id);
+            
+            CREATE INDEX order_item_id_index
+            ON Order_items (order_item_id);
         '''
         self.run_script_query(script)
 
