@@ -144,6 +144,12 @@ class Database:
             DROP INDEX customer_postal_code_index;
         '''
         self.run_script_query(script)
+
+    def drop_view(self):
+        script = '''
+            DROP VIEW OrderSize;
+        '''
+        self.run_script_query(script)
 ###################################################################
 
 
@@ -179,8 +185,6 @@ def solution(DATABASE, customer_postal_code):
     GROUP BY order_id
     HAVING COUNT(*) > ai.avg_size
     );
-
-    DROP VIEW IF EXISTS OrderSize;
     '''
     DATABASE.run_script_query(script)
     return DATABASE.fetch_one()
@@ -205,6 +209,7 @@ def run_Scenarios(DATABASE, customer_postal_code, weight_counts):
     print("-- Uninformed Scenario:")
     DATABASE.uninformed()
     time_taken = run_solution(DATABASE, customer_postal_code)
+    DATABASE.drop_view()
     DATABASE.close_database()
     DATABASE.reconnect_database()
     print('Time taken =', time_taken)
@@ -213,6 +218,7 @@ def run_Scenarios(DATABASE, customer_postal_code, weight_counts):
     print("-- Self-optimized Scenario:")
     DATABASE.self_optimized()
     time_taken = run_solution(DATABASE, customer_postal_code)
+    DATABASE.drop_view()
     DATABASE.close_database()
     DATABASE.reconnect_database()
     print('Time taken =', time_taken)
@@ -221,6 +227,7 @@ def run_Scenarios(DATABASE, customer_postal_code, weight_counts):
     print("-- User-optimized Scenario")
     DATABASE.user_optimized()
     time_taken = run_solution(DATABASE, customer_postal_code)
+    DATABASE.drop_view()
     DATABASE.close_database()
     print('Time taken =', time_taken)
     fill_weight_counts("User-optimized", weight_counts, time_taken)
@@ -244,7 +251,7 @@ if __name__ == "__main__":
     A3Small = Database('A3Small.db')
     A3Medium = Database('A3Medium.db')
     A3Large = Database('A3Large.db')
-    customer_postal_code = 14409
+    customer_postal_code = 1422
     species = (
         "SmallDB",
         "MediumDB",
