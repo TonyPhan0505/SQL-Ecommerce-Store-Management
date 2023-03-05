@@ -1,0 +1,12 @@
+﻿Group ID: 4
+CCIDs: bhphan, ngocdath
+Names: Binh Phan, Julian Doan
+
+
+We declare that we did not collaborate with anyone outside our own group in this assignment.
+
+
+Q1: We need to create the indices customer_postal_code_index, customer_id_index and order_id_index because the fields customer_postal_code, customer_id and order_id are used in the WHERE clause to query for the customer records in the Customers table.
+
+
+Q3: We need to create the indices customer_postal_code_index, customer_id_index and order_id_index because the fields customer_postal_code, customer_id and order_id are used in the WHERE clause to query for the customer records in the Customers table. The order_item_id_index index is needed to speed up the search for order items that belong to a particular order.
