@@ -1,6 +1,6 @@
 ﻿Group ID: 4
 CCIDs: bhphan, ngocdath
-Names: Binh Phan, Julian Doan
+Names: Binh Phan, Julia Doan
 
 
 We declare that we did not collaborate with anyone outside our own group in this assignment.
