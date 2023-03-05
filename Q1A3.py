@@ -229,7 +229,7 @@ if __name__ == "__main__":
     A3Small = Database('A3Small.db')
     A3Medium = Database('A3Medium.db')
     A3Large = Database('A3Large.db')
-    customer_postal_code = 14409
+    customer_postal_code = 3673
     species = (
         "SmallDB",
         "MediumDB",
