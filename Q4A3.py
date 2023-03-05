@@ -155,18 +155,34 @@ def solution(DATABASE, customer_postal_code):
     3. Sort result randomly
     4. Select the first row
     '''
+    # script = f'''
+    # SELECT COUNT(DISTINCT customer_postal_code) AS unique_postal_codes
+    # FROM Customers
+    # WHERE customer_id IN (
+    #     SELECT customer_id
+    #     FROM Orders
+    #     GROUP BY customer_id
+    #     HAVING COUNT(*) > 1
+    # )
+    # GROUP BY customer_id
+    # ORDER BY RANDOM()
+    # LIMIT 1;
+    # '''
     script = f'''
-    SELECT COUNT(DISTINCT customer_postal_code) AS unique_postal_codes
-    FROM Customers
-    WHERE customer_id IN (
+    SELECT COUNT(DISTINCT customer_postal_code) AS num_postal_codes
+FROM (
+    SELECT c.customer_postal_code
+    FROM Orders o, Customers c, Sellers s
+    WHERE o.customer_id = (
         SELECT customer_id
         FROM Orders
         GROUP BY customer_id
-        HAVING COUNT(*) > 1
+        HAVING COUNT(DISTINCT order_id) > 1
+        ORDER BY RANDOM()
+        LIMIT 1
     )
-    GROUP BY customer_id
-    ORDER BY RANDOM()
-    LIMIT 1;
+    GROUP BY s.seller_id
+) ;
     '''
     DATABASE.run_single_query(script)
     return DATABASE.fetch_one()
