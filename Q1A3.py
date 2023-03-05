@@ -133,14 +133,14 @@ class Database:
             CREATE INDEX customer_postal_code_index
             ON Customers (customer_postal_code);
 
-            CREATE INDEX seller_postal_code_index
-            ON Sellers (seller_postal_code);
+            CREATE INDEX order_id_index
+            ON Orders (order_id);
         '''
         self.run_script_query(script)
     
     def drop_indices(self):
         script = '''
-            DROP INDEX seller_postal_code_index;
+            DROP INDEX order_id_index;
             DROP INDEX customer_postal_code_index;
         '''
         self.run_script_query(script)
