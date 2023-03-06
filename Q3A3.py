@@ -106,7 +106,7 @@ class Database:
                 order_id TEXT,
                 customer_id TEXT,
                 PRIMARY KEY(order_id),
-                FOREIGN KEY(customer_id) REFERENCES Customers(customer_id) ON DELETE CASCADE
+                FOREIGN KEY(customer_id) REFERENCES Customers(customer_id)
             );
             INSERT INTO Orders SELECT * FROM Old_Orders;
 
@@ -116,8 +116,8 @@ class Database:
                 product_id TEXT,
                 seller_id TEXT,
                 PRIMARY KEY(order_id,order_item_id,product_id,seller_id), 
-                FOREIGN KEY(seller_id) REFERENCES Sellers(seller_id) ON DELETE CASCADE, 
-                FOREIGN KEY(order_id) REFERENCES Orders(order_id) ON DELETE CASCADE
+                FOREIGN KEY(seller_id) REFERENCES Sellers(seller_id), 
+                FOREIGN KEY(order_id) REFERENCES Orders(order_id)
             );
             INSERT INTO Order_items SELECT * FROM Old_Order_items;
 
